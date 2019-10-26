@@ -7,20 +7,24 @@
 
 Jump to the line which matches one of the following:
 
-```C#:
+__C#__
+```
 main.cs(9,10): error CS1002: ; expected
 ```
 
-```Python:
+__Python__
+```
 Traceback (most recent call last):
   File "./prog.py", line 1, in <module>
 ```
 
-```Ruby:
+__Ruby__
+```
 prog.rb:1:in `<main>': undefined local variable or method `aaaa' for main:Object (NameError)
 ```
 
-```Rust:
+__Rust__
+```
 error: expected expression, found `:`
  --> src\main.rs:7:42
   |
