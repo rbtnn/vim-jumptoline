@@ -4,6 +4,7 @@ let s:ps = [
     \   { 'type' : 'C#', 'regex' : '^\s*\(.*\.cs\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
+    \   { 'type' : 'Go', 'regex' : '^\s*\(.*.go\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \ ]
 
 function! jumptoline#exec() abort

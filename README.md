@@ -32,6 +32,11 @@ error: expected expression, found `:`
   |                                          ^ expected expression
 ```
 
+__Go__
+```
+prog.go:1:1: expected 'package', found aaaaaa
+```
+
 
 ## License
 
