@@ -7,7 +7,7 @@
 
 Jump to the line which matches one of the following:
 
-__C#__
+__C#,F#__
 ```
 main.cs(9,10): error CS1002: ; expected
 ```
@@ -32,7 +32,7 @@ error: expected expression, found `:`
   |                                          ^ expected expression
 ```
 
-__Go__
+__Go,gcc,Clang__
 ```
 prog.go:1:1: expected 'package', found aaaaaa
 ```

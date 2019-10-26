@@ -1,10 +1,10 @@
 
 let s:ps = [
     \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, },
-    \   { 'type' : 'C#', 'regex' : '^\s*\(.*\.cs\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, },
+    \   { 'type' : 'C#,F#', 'regex' : '^\s*\(.*\.cs\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
-    \   { 'type' : 'Go', 'regex' : '^\s*\(.*.go\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
+    \   { 'type' : 'Go,gcc,Clang', 'regex' : '^\s*\(.*\.[^.]\+\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \ ]
 
 function! jumptoline#exec() abort
