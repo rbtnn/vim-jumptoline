@@ -12,12 +12,11 @@ function! jumptoline#exec() abort
     for p in s:ps
         let m = matchlist(line, p['regex'])
         if !empty(m)
-            let fullpath = s:expand2fullpath(m[p['path_i']])
-            let lnum = str2nr(m[p['lnum_i']])
-            if filereadable(fullpath)
+            for fullpath in s:find_thefile(m[p['path_i']])
+                let lnum = str2nr(m[p['lnum_i']])
                 let b = 0
                 for x in filter(getwininfo(), { i,x -> x['tabnr'] == tabpagenr() })
-                    if s:expand2fullpath(bufname(x['bufnr'])) is fullpath
+                    if s:expand2fullpath(bufname(x['bufnr'])) == s:expand2fullpath(fullpath)
                         execute x['winnr'] . 'wincmd w'
                         let b = 1
                         break
@@ -34,9 +33,24 @@ function! jumptoline#exec() abort
                 endif
                 normal! zz
                 break
-            endif
+            endfor
         endif
     endfor
+endfunction
+
+function! s:find_thefile(target)
+    for info in getwininfo()
+        for s in [fnamemodify(bufname(info['bufnr']), ':p:h'), getcwd(info['winnr'], info['tabnr'])]
+            let xs = split(s, '[\/]')
+            for n in reverse(range(0, len(xs) - 1))
+                let path = expand(join(xs[:n] + [(a:target)], '/'))
+                if filereadable(path)
+                    return [path]
+                endif
+            endfor
+        endfor
+    endfor
+    return []
 endfunction
 
 function! s:expand2fullpath(path)
