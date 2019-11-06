@@ -1,5 +1,6 @@
 
 let s:ps = [
+    \   { 'type' : 'quickfix', 'regex' : '^\([^|]*\)|\(\d\+\)\( col \d\+\)\?|', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'C#,F#', 'regex' : '^\s*\(.*\.cs\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },

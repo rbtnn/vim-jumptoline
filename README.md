@@ -7,6 +7,11 @@
 
 Jump to the line if cursorline matches one of the following:
 
+__QuickFix on Vim__
+```
+xxx.vim|1006 col 8| call system(prog)
+```
+
 __C#,F#__
 ```
 main.cs(9,10): error CS1002: ; expected
