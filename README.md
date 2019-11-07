@@ -42,6 +42,10 @@ __Go,gcc,Clang__
 prog.go:1:1: expected 'package', found aaaaaa
 ```
 
+## Concepts
+
+* This plugin does not provide to customize user-settings.
+* This plugin provides only one command.
 
 ## License
 
