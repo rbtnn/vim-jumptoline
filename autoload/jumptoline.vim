@@ -26,7 +26,7 @@ function! jumptoline#exec() abort
                 let b = 0
                 for x in filter(getwininfo(), { i,x -> x['tabnr'] == tabpagenr() })
                     if s:expand2fullpath(bufname(x['bufnr'])) == s:expand2fullpath(fullpath)
-                        execute x['winnr'] . 'wincmd w'
+                        execute x['winnr'] .. 'wincmd w'
                         let b = 1
                         break
                     endif
