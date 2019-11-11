@@ -7,9 +7,8 @@ endif
 
 let s:ps = [
     \   { 'type' : 'quickfix', 'regex' : '^\([^|]*\)|\(\d\+\)\( col \d\+\)\?|', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
-    \   { 'type' : 'msbuild', 'regex' : '^\s*\(.*\)(\(\d\+\),\(\d\+\)):', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
+    \   { 'type' : 'msbuild,C#,F#', 'regex' : '^\s*\(.*\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, },
-    \   { 'type' : 'C#,F#', 'regex' : '^\s*\(.*\.cs\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Go,gcc,Clang', 'regex' : '^\s*\(.*\.[^.]\+\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
