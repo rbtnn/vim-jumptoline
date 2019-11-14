@@ -17,6 +17,11 @@ __MSBuild__
   C:\Users\rbtnn\Desktop\main.vb(923,21): warning BC42021: ...
 ```
 
+__VC__
+```
+  C:\Users\rbtnn\Desktop\main.vb(923): warning BC42021: ...
+```
+
 __C#,F#__
 ```
 main.cs(9,10): error CS1002: ; expected

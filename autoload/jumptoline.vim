@@ -8,6 +8,7 @@ endif
 let s:ps = [
     \   { 'type' : 'quickfix', 'regex' : '^\([^|]*\)|\(\d\+\)\( col \d\+\)\?|', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \   { 'type' : 'msbuild,C#,F#', 'regex' : '^\s*\(.*\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
+    \   { 'type' : 'VC', 'regex' : '^\s*\(.*\)(\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
@@ -20,8 +21,14 @@ function! jumptoline#exec() abort
         let m = matchlist(line, p['regex'])
         if !empty(m)
             for fullpath in s:find_thefile(m[p['path_i']])
-                let lnum = str2nr(m[p['lnum_i']])
-                let col = str2nr(m[p['col_i']])
+                let lnum = 1
+                if has_key(p, 'lnum_i')
+                    let lnum = str2nr(m[p['lnum_i']])
+                endif
+                let col = 1
+                if has_key(p, 'col_i')
+                    let col = str2nr(m[p['col_i']])
+                endif
                 let b = 0
                 for x in filter(getwininfo(), { i,x -> x['tabnr'] == tabpagenr() })
                     if s:expand2fullpath(bufname(x['bufnr'])) == s:expand2fullpath(fullpath)
