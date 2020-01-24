@@ -5,7 +5,10 @@
 
 ### :JumpToLine
 
-Jump to the line if cursorline matches one of the following:
+![](https://raw.githubusercontent.com/rbtnn/vim-jumptoline/master/jumptoline.gif)
+
+Jump to the line if cursorline matches one of the following.  
+If no match is found on the quickfix window, use the infomation of quickfix on the cursor.  
 
 __QuickFix on Vim__
 ```
