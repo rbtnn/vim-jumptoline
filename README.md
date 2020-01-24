@@ -50,6 +50,11 @@ __Go,gcc,Clang__
 prog.go:1:1: expected 'package', found aaaaaa
 ```
 
+## Requirements
+
+* Vim 8.1 or above
+* Vim must be compiled with `+popupwin` feature
+
 ## Concepts
 
 * This plugin does not provide to customize user-settings.
