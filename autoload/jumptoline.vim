@@ -42,8 +42,10 @@ function! jumptoline#exec() abort
         endif
     endfor
     if !found && (&filetype == 'qf')
-        let x = getqflist()[line('.') - 1]
-        call s:open_popup(x['bufnr'], '', x['lnum'], x['col'])
+        let x = get(getqflist(), line('.') - 1, {})
+        if !empty(x)
+            call s:open_popup(x['bufnr'], '', x['lnum'], x['col'])
+        endif
     endif
 endfunction
 
