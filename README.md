@@ -6,7 +6,7 @@
 ### :JumpToLine
 
 Jump to the line if cursorline matches one of the following patterns.  
-If no match is found on the quickfix window, use the infomation under the cursor of quickfix.  
+If no match is found on the quickfix window, use the information under the cursor of quickfix.  
 
 ![](https://raw.githubusercontent.com/rbtnn/vim-jumptoline/master/jumptoline.gif)
 
