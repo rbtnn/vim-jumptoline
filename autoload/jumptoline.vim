@@ -46,7 +46,7 @@ endfunction
 function! s:open_popup(...) abort
     let title = 'Choose a window to open'
     let candidates = s:winnrlist(a:1, a:2) + [s:NEW_WINDOW, s:NEW_TABPAGE]
-    if has('popupwin') && v:false
+    if has('popupwin')
         call popup_menu(candidates, #{
             \   title: title,
             \   callback: function('s:callback', a:000),
