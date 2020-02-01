@@ -9,6 +9,8 @@ let s:ps = [
     \   { 'type' : 'Go,gcc,Clang', 'regex' : '^\s*\(.*\.[^.]\+\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \ ]
 
+let s:jumptoline_border_winnr = -1
+
 let s:NEW_WINDOW = 'new window'
 let s:NEW_TABPAGE = 'new tabpage'
 
@@ -50,8 +52,10 @@ function! s:open_popup(...) abort
         call popup_menu(candidates, #{
             \   title: title,
             \   callback: function('s:callback', a:000),
+            \   filter: function('s:filter'),
             \   padding: [1,1,1,1],
             \ })
+        call s:set_border(1)
     else
         let lines = []
         for can in candidates
@@ -64,7 +68,63 @@ function! s:open_popup(...) abort
     endif
 endfunction
 
+function! s:clear_border() abort
+    if -1 != s:jumptoline_border_winnr
+        call popup_close(s:jumptoline_border_winnr)
+        let s:jumptoline_border_winnr = -1
+    endif
+endfunction
+
+function! s:set_border(winnr) abort
+    let ws = filter(getwininfo(), { i,x -> (x['tabnr'] == tabpagenr()) && (a:winnr == x['winnr']) })
+    if 1 == len(ws)
+        let winfo = ws[0]
+        let offset = 0
+        if has('tabsidebar')
+            let offset += &tabsidebarcolumns
+        endif
+        let b = 2
+        let w = winfo['width'] - b
+        let h = winfo['height'] - b
+        let s:jumptoline_border_winnr = popup_create('', #{
+            \   line: winfo['winrow'],
+            \   col: offset + winfo['wincol'],
+            \   mask: [[b, w + 1, b, h + 1]],
+            \   minwidth: w,
+            \   minheight: h,
+            \   border: [],
+            \   borderchars: [' ',' ',' ',' ',' ',' ',' ',' '],
+            \   borderhighlight: ['Error'],
+            \ })
+    endif
+endfunction
+
+function! s:filter(winid, key) abort
+    call s:clear_border()
+    let lnum = line('.', a:winid)
+    let maxlnum =  line('$', a:winid)
+    if a:key == 'j'
+        let lnum += 1
+        if maxlnum < lnum
+            let lnum = maxlnum
+        endif
+    endif
+    if a:key == 'k'
+        let lnum -= 1
+        if lnum < 1
+            let lnum = 1
+        endif
+    endif
+    let line = getbufline(winbufnr(a:winid), lnum, lnum)[0]
+    let wnr = matchstr(line, '^\d\+')
+    if 0 < wnr
+        call s:set_border(wnr)
+    endif
+    return popup_filter_menu(a:winid, a:key)
+endfunction
+
 function! s:callback(bnr, fullpath, lnum, col, winid, key) abort
+    call s:clear_border()
     if 0 < a:key
         let line = getbufline(winbufnr(a:winid), a:key)[0]
         call s:callback_sub(line, a:bnr, a:fullpath, a:lnum, a:col)
