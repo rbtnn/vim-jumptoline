@@ -1,14 +1,30 @@
 
 # vim-jumptoline
 
+This plugin provides to jump to the line if cursorline includes a filename with lnum such as a line of build errors.
+
+![](https://raw.githubusercontent.com/rbtnn/vim-jumptoline/master/jumptoline.gif)
+
+## Concepts
+
+* This plugin supports Vim and Neovim. If your Vim has `+popupwin` feature, use `popup_menu()` instead of `inputlist()`.
+* This plugin does not provide to customize user-settings.
+* This plugin provides only one command.
+
+## Installation
+
+This is an example of installation using [vim-plug](https://github.com/junegunn/vim-plug).
+
+```
+Plug 'rbtnn/vim-jumptoline'
+```
+
 ## Usage
 
 ### :JumpToLine
 
 Jump to the line if cursorline matches one of the following patterns.  
 If no match is found on the quickfix window, use the information under the cursor of quickfix.  
-
-![](https://raw.githubusercontent.com/rbtnn/vim-jumptoline/master/jumptoline.gif)
 
 ## Patterns
 
@@ -51,13 +67,6 @@ __Go,gcc,Clang__
 ```
 prog.go:1:1: expected 'package', found aaaaaa
 ```
-
-
-## Concepts
-
-* This plugin supports Vim and Neovim. If your Vim has `+popupwin` feature, use `popup_menu()` instead of `inputlist()`.
-* This plugin does not provide to customize user-settings.
-* This plugin provides only one command.
 
 ## License
 
