@@ -82,7 +82,7 @@ function! s:set_border(winnr) abort
         let offset = 0
         if has('tabsidebar')
             if !&tabsidebaralign
-                if (2 == &tabsidebar) || ((1 < tabpagenr('$')) && (1 == &tabsidebar))
+                if (2 == &showtabsidebar) || ((1 < tabpagenr('$')) && (1 == &showtabsidebar))
                     let offset += &tabsidebarcolumns
                 endif
             endif
