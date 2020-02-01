@@ -26,6 +26,12 @@ Plug 'rbtnn/vim-jumptoline'
 Jump to the line if cursorline matches one of the following patterns.  
 If no match is found on the quickfix window, use the information under the cursor of quickfix.  
 
+You map a key to `:JumpToLine` in your .vimrc, then it's so useful for jumpping.
+
+```
+nnoremap <silent><nowait><space>     :<C-u>JumpToLine<cr>
+```
+
 ## Patterns
 
 __QuickFix on Vim__
