@@ -81,7 +81,11 @@ function! s:set_border(winnr) abort
         let winfo = ws[0]
         let offset = 0
         if has('tabsidebar')
-            let offset += &tabsidebarcolumns
+            if !&tabsidebaralign
+                if (2 == &tabsidebar) || ((1 < tabpagenr('$')) && (1 == &tabsidebar))
+                    let offset += &tabsidebarcolumns
+                endif
+            endif
         endif
         let b = 2
         let w = winfo['width'] - b
