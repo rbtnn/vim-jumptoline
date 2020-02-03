@@ -55,7 +55,10 @@ function! s:open_popup(...) abort
             \   filter: function('s:filter'),
             \   padding: [1,1,1,1],
             \ })
-        call s:set_border(1)
+        let xs = s:get_target_wininfos(a:1, a:2)
+        if 0 < len(xs)
+            call s:set_border(xs[0]['winnr'])
+        endif
     else
         let lines = []
         for can in candidates
@@ -73,6 +76,17 @@ function! s:clear_border() abort
         call popup_close(s:jumptoline_border_winnr)
         let s:jumptoline_border_winnr = -1
     endif
+endfunction
+
+function! s:get_target_wininfos(bnr, fullpath) abort
+    let xs = []
+    for x in getwininfo()
+        let x['modified'] = getbufvar(x['bufnr'], '&modified', 0)
+        if (x['tabnr'] == tabpagenr()) && (!x['terminal']) && (s:same_buffer(x['bufnr'], a:bnr, a:fullpath) || !x['modified'])
+            let xs += [x]
+        endif
+    endfor
+    return xs
 endfunction
 
 function! s:set_border(winnr) abort
@@ -161,33 +175,30 @@ endfunction
 
 function! s:winnrlist(bnr, fullpath)
     let ws = []
-    for x in getwininfo()
-        let x['modified'] = getbufvar(x['bufnr'], '&modified', 0)
-        if (x['tabnr'] == tabpagenr()) && (!x['terminal']) && (s:same_buffer(x['bufnr'], a:bnr, a:fullpath) || !x['modified'])
-            if x['quickfix']
-                let name = '[quickfix]'
-            elseif x['loclist']
-                let name = '[loclist]'
-            elseif 'help' == getbufvar(x['bufnr'], '&buftype')
-                let name = '[help]'
-            else
-                let name = bufname(x['bufnr'])
-                if empty(name)
-                    let name = '[No Name]'
-                endif
+    for x in s:get_target_wininfos(a:bnr, a:fullpath)
+        if x['quickfix']
+            let name = '[quickfix]'
+        elseif x['loclist']
+            let name = '[loclist]'
+        elseif 'help' == getbufvar(x['bufnr'], '&buftype')
+            let name = '[help]'
+        else
+            let name = bufname(x['bufnr'])
+            if empty(name)
+                let name = '[No Name]'
             endif
-            let mark = ' '
-            if x['winnr'] == winnr('#')
-                let mark = '#'
-            elseif x['bufnr'] == bufnr()
-                let mark = '%'
-            endif
-            let modified = ''
-            if x['modified']
-                let modified = '[+]'
-            endif
-            let ws += [printf('%d %s %s%s', x['winnr'], mark, name, modified)]
         endif
+        let mark = ' '
+        if x['winnr'] == winnr('#')
+            let mark = '#'
+        elseif x['bufnr'] == bufnr()
+            let mark = '%'
+        endif
+        let modified = ''
+        if x['modified']
+            let modified = '[+]'
+        endif
+        let ws += [printf('%d %s %s%s', x['winnr'], mark, name, modified)]
     endfor
     return ws
 endfunction
