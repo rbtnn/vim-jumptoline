@@ -3,7 +3,7 @@ let s:ps = [
     \   { 'type' : 'quickfix', 'regex' : '^\([^|]*\)|\(\(\d\+\)\( col \(\d\+\)\)\?[^|]*\)\?|', 'path_i' : 1, 'lnum_i' : 3, 'col_i' : 5, },
     \   { 'type' : 'msbuild,C#,F#', 'regex' : '^\s*\(.*\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \   { 'type' : 'VC', 'regex' : '^\s*\(.*\)(\(\d\+\))\s*:.*$', 'path_i' : 1, 'lnum_i' : 2, },
-    \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, },
+    \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Go,gcc,Clang', 'regex' : '^\s*\(.*\.[^.]\+\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
@@ -36,12 +36,12 @@ function! jumptoline#matches(line) abort
     for p in s:ps
         let m = matchlist(a:line, p['regex'])
         if !empty(m)
-            let lnum = 1
+            let lnum = 0
             if has_key(p, 'lnum_i')
                 let lnum = str2nr(m[p['lnum_i']])
             endif
 
-            let col = 1
+            let col = 0
             if has_key(p, 'col_i')
                 let col = str2nr(m[p['col_i']])
             endif
@@ -63,35 +63,35 @@ function! jumptoline#run_tests() abort
 
     let v:errors = []
 
-    call assert_equal([
-        \ {'lnum': 0, 'col': 0, 'path': 'xxx.vim'}],
+    call assert_equal(
+        \ [{ 'lnum': 0, 'col': 0, 'path': 'xxx.vim'}],
         \ jumptoline#matches('xxx.vim||'))
-    call assert_equal([
-        \ {'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
+    call assert_equal(
+        \ [{ 'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
         \ jumptoline#matches('xxx.vim|1006 col 8 error| call system(prog)'))
-    call assert_equal([
-        \ {'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
+    call assert_equal(
+        \ [{ 'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
         \ jumptoline#matches('xxx.vim|1006 col 8| call system(prog)'))
-    call assert_equal([
-        \ {'lnum': 923, 'col': 21, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
+    call assert_equal(
+        \ [{ 'lnum': 923, 'col': 21, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
         \  jumptoline#matches('C:\Users\rbtnn\Desktop\main.vb(923,21): warning BC42021: ...'))
-    call assert_equal([
-        \ {'lnum': 923, 'col': 1, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
+    call assert_equal(
+        \ [{ 'lnum': 923, 'col': 0, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
         \  jumptoline#matches('C:\Users\rbtnn\Desktop\main.vb(923): warning BC42021: ...'))
-    call assert_equal([
-        \ {'lnum': 9, 'col': 10, 'path': 'main.cs'}],
+    call assert_equal(
+        \ [{ 'lnum': 9, 'col': 10, 'path': 'main.cs'}],
         \  jumptoline#matches('main.cs(9,10): error CS1002: ; expected'))
-    call assert_equal([
-        \ {'lnum': 1, 'col': 1, 'path': './prog.py'}],
+    call assert_equal(
+        \ [{ 'lnum': 1, 'col': 0, 'path': './prog.py'}],
         \  jumptoline#matches('File "./prog.py", line 1, in <module>'))
-    call assert_equal([
-        \ {'lnum': 1, 'col': 1, 'path': 'prog.rb'}],
+    call assert_equal(
+        \ [{ 'lnum': 1, 'col': 0, 'path': 'prog.rb'}],
         \  jumptoline#matches('prog.rb:1:in `<main>'': undefined local variable or method `aaaa'' for ...'))
-    call assert_equal([
-        \ {'lnum': 7, 'col': 1, 'path': 'src\main.rs'}],
+    call assert_equal(
+        \ [{ 'lnum': 7, 'col': 42, 'path': 'src\main.rs'}],
         \  jumptoline#matches('--> src\main.rs:7:42'))
-    call assert_equal([
-        \ {'lnum': 1, 'col': 1, 'path': 'prog.go'}],
+    call assert_equal(
+        \ [{ 'lnum': 1, 'col': 1, 'path': 'prog.go'}],
         \  jumptoline#matches('prog.go:1:1: expected ''package'', found aaaaaa'))
 
     call writefile(v:errors, s:TEST_LOG)
