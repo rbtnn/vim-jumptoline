@@ -9,6 +9,8 @@ let s:ps = [
     \   { 'type' : 'Go,gcc,Clang', 'regex' : '^\s*\(.*\.[^.]\+\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \ ]
 
+let s:TEST_LOG = expand('<sfile>:h:gs?\?/?') . '/test.log'
+
 let s:NEW_WINDOW = 'new window'
 let s:NEW_TABPAGE = 'new tabpage'
 
@@ -52,6 +54,52 @@ function! jumptoline#matches(line) abort
         endif
     endfor
     return ds
+endfunction
+
+function! jumptoline#run_tests() abort
+    if filereadable(s:TEST_LOG)
+        call delete(s:TEST_LOG)
+    endif
+
+    let v:errors = []
+
+    call assert_equal([
+        \ {'lnum': 1, 'col': 0, 'path': 'xxx.vim'}],
+        \ jumptoline#matches('xxx.vim||'))
+    call assert_equal([
+        \ {'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
+        \ jumptoline#matches('xxx.vim|1006 col 8 error| call system(prog)'))
+    call assert_equal([
+        \ {'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
+        \ jumptoline#matches('xxx.vim|1006 col 8| call system(prog)'))
+    call assert_equal([
+        \ {'lnum': 923, 'col': 21, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
+        \  jumptoline#matches('C:\Users\rbtnn\Desktop\main.vb(923,21): warning BC42021: ...'))
+    call assert_equal([
+        \ {'lnum': 923, 'col': 1, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
+        \  jumptoline#matches('C:\Users\rbtnn\Desktop\main.vb(923): warning BC42021: ...'))
+    call assert_equal([
+        \ {'lnum': 9, 'col': 10, 'path': 'main.cs'}],
+        \  jumptoline#matches('main.cs(9,10): error CS1002: ; expected'))
+    call assert_equal([
+        \ {'lnum': 1, 'col': 1, 'path': './prog.py'}],
+        \  jumptoline#matches('File "./prog.py", line 1, in <module>'))
+    call assert_equal([
+        \ {'lnum': 1, 'col': 1, 'path': 'prog.rb'}],
+        \  jumptoline#matches('prog.rb:1:in `<main>'': undefined local variable or method `aaaa'' for ...'))
+    call assert_equal([
+        \ {'lnum': 7, 'col': 1, 'path': 'src\main.rs'}],
+        \  jumptoline#matches('--> src\main.rs:7:42'))
+    call assert_equal([
+        \ {'lnum': 1, 'col': 1, 'path': 'prog.go'}],
+        \  jumptoline#matches('prog.go:1:1: expected ''package'', found aaaaaa'))
+
+    call writefile(v:errors, s:TEST_LOG)
+    for err in v:errors
+        echohl Error
+        echo err
+        echohl None
+    endfor
 endfunction
 
 function! jumptoline#callback(line, bnr, fullpath, lnum, col) abort

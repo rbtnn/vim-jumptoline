@@ -1,0 +1,23 @@
+language: generic
+sudo: false
+git:
+  depth: 1
+
+matrix:
+  include:
+    - os: linux
+      env:
+        - VIM_VERSION=master
+addons:
+  apt:
+    packages:
+      - vim
+
+cache:
+  directories:
+    - /tmp/vim
+
+script:
+  - vim --version
+  - vim -u NONE -N --noplugin --not-a-term -c "set rtp+=./vim-jumptoline" -c "call jumptoline#run_tests()" -c "qa!"
+  - if test -f test.log; then exit 1; fi
