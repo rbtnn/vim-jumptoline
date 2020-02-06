@@ -37,6 +37,8 @@ nnoremap <silent><nowait><space>     :<C-u>JumpToLine<cr>
 __QuickFix on Vim__
 ```
 xxx.vim|1006 col 8| call system(prog)
+xxx.vim|1006 col 8 error| call system(prog)
+xxx.vim||
 ```
 
 __MSBuild__
