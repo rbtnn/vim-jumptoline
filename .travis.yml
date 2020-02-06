@@ -18,9 +18,7 @@ cache:
 
 script:
   - pwd
-  - pushd ./vim-jumptoline
-  -   vim --version
-  -   vim -u NONE -N --noplugin --not-a-term -c "set rtp+=." -c "call jumptoline#run_tests()" -c "qa!"
-  -   if test -f test.log; then exit 1; fi
-  - popd
+  - vim --version
+  - vim -u NONE -N --noplugin --not-a-term -c "set rtp+=." -c "call jumptoline#run_tests()" -c "qa!"
+  - if test -f test.log; then exit 1; fi
 
