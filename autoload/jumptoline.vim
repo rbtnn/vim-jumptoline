@@ -125,7 +125,7 @@ endfunction
 function! s:choose_awin(bnr, fullpath, lnum, col) abort
     let title = 'Choose a window to open'
     let candidates = s:winnrlist(a:bnr, a:fullpath) + [s:NEW_WINDOW, s:NEW_TABPAGE]
-    if has('popupwin') && get(g:, 'jumptoline_enabled', 1)
+    if has('popupwin') && get(g:, 'jumptoline_debug', 1)
         call jumptoline#popupwin#open(title, candidates, a:bnr, a:fullpath, a:lnum, a:col)
     else
         let lines = []
