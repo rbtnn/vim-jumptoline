@@ -9,7 +9,7 @@ let s:ps = [
     \   { 'type' : 'Go,gcc,Clang', 'regex' : '^\s*\(.*\.[^.]\+\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \ ]
 
-let s:TEST_LOG = expand('<sfile>:h:gs?\?/?') . '/test.log'
+let s:TEST_LOG = expand('<sfile>:h:h:gs?\?/?') . '/test.log'
 
 let s:NEW_WINDOW = 'new window'
 let s:NEW_TABPAGE = 'new tabpage'
@@ -64,7 +64,7 @@ function! jumptoline#run_tests() abort
     let v:errors = []
 
     call assert_equal(
-        \ [{ 'lnum': 0, 'col': 0, 'path': 'xxx.vim'}],
+        \ [{ 'lnum': 0, 'col': 1, 'path': 'xxx.vim'}],
         \ jumptoline#matches('xxx.vim||'))
     call assert_equal(
         \ [{ 'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
@@ -94,12 +94,14 @@ function! jumptoline#run_tests() abort
         \ [{ 'lnum': 1, 'col': 1, 'path': 'prog.go'}],
         \  jumptoline#matches('prog.go:1:1: expected ''package'', found aaaaaa'))
 
-    call writefile(v:errors, s:TEST_LOG)
-    for err in v:errors
-        echohl Error
-        echo err
-        echohl None
-    endfor
+    if !empty(v:errors)
+        call writefile(v:errors, s:TEST_LOG)
+        for err in v:errors
+            echohl Error
+            echo err
+            echohl None
+        endfor
+    endif
 endfunction
 
 function! jumptoline#callback(line, bnr, fullpath, lnum, col) abort
