@@ -64,7 +64,7 @@ function! jumptoline#run_tests() abort
     let v:errors = []
 
     call assert_equal(
-        \ [{ 'lnum': 0, 'col': 1, 'path': 'xxx.vim'}],
+        \ [{ 'lnum': 0, 'col': 0, 'path': 'xxx.vim'}],
         \ jumptoline#matches('xxx.vim||'))
     call assert_equal(
         \ [{ 'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
