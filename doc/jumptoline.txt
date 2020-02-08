@@ -7,6 +7,8 @@ CONTENTS                                                 *jumptoline-contents*
 
 Concepts                |jumptoline-concepts|
 Commands                |jumptoline-commands|
+Functions               |jumptoline-functions|
+Patterns                |jumptoline-patterns|
 
 
 
@@ -23,7 +25,7 @@ Concepts                                                 *jumptoline-concepts*
 ==============================================================================
 Commands                                                 *jumptoline-commands*
 
-                                              *jumptoline-commands-JumpToLine*
+                                                         *:JumpToLine*
 :JumpToLine	Jump to the line if cursorline matches one of the following
 		|jumptoline-patterns|. If no match is found on the quickfix
 		window, use the information under the cursor of quickfix.
@@ -33,6 +35,18 @@ Commands                                                 *jumptoline-commands*
 >
 		nnoremap <silent><nowait><space>     :<C-u>JumpToLine<cr>
 <
+
+
+==============================================================================
+Functions                                                *jumptoline-functions*
+
+jumptoline#exec({line})                                  *jumptoline#exec()*
+		Jump to the line if {line} matches one of the following
+		|jumptoline-patterns|.
+
+		NOTE |:JumpToLine| equals to `jumptoline#exec(getline('.'))`.
+
+
 
 ==============================================================================
 Patterns                                                 *jumptoline-patterns*

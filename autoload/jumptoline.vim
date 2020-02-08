@@ -14,9 +14,9 @@ let s:TEST_LOG = expand('<sfile>:h:h:gs?\?/?') . '/test.log'
 let s:NEW_WINDOW = 'new window'
 let s:NEW_TABPAGE = 'new tabpage'
 
-function! jumptoline#exec() abort
+function! jumptoline#exec(line) abort
     let found = v:false
-    for d in jumptoline#matches(getline('.'))
+    for d in jumptoline#matches(a:line)
         for fullpath in jumptoline#utils#find_thefile(d['path'])
             call s:choose_awin(-1, fullpath, d['lnum'], d['col'])
             let found = v:true
