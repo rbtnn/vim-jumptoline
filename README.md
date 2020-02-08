@@ -76,6 +76,11 @@ __Go,gcc,Clang__
 prog.go:1:1: expected 'package', found aaaaaa
 ```
 
+__ripgrep__
+```
+    C:/Go/LICENSE:20
+```
+
 ## License
 
 Distributed under MIT License. See LICENSE.

@@ -6,7 +6,7 @@ let s:ps = [
     \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
     \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
     \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
-    \   { 'type' : 'Go,gcc,Clang', 'regex' : '^\s*\(.*\.[^.]\+\):\(\d\+\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
+    \   { 'type' : 'Go,gcc,Clang,ripgrep,', 'regex' : '^\s*\(.\{-}\):\(\d\+\)\(:\(\d\+\):\)\?.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 4, },
     \ ]
 
 let s:TEST_LOG = expand('<sfile>:h:h:gs?\?/?') . '/test.log'
@@ -33,9 +33,12 @@ endfunction
 
 function! jumptoline#matches(line) abort
     let ds = []
+    let best_match_point = 0
     for p in s:ps
         let m = matchlist(a:line, p['regex'])
         if !empty(m)
+            let path = m[p['path_i']]
+
             let lnum = 0
             if has_key(p, 'lnum_i')
                 let lnum = str2nr(m[p['lnum_i']])
@@ -46,11 +49,23 @@ function! jumptoline#matches(line) abort
                 let col = str2nr(m[p['col_i']])
             endif
 
-            let ds += [{
-                \ 'path' : m[p['path_i']],
+            let d = {
+                \ 'path' : path,
                 \ 'lnum' : lnum,
                 \ 'col' : col,
-                \ }]
+                \ }
+            if -1 == index(ds, d)
+                let point = (0 < lnum) + (0 < col) + filereadable(path)
+
+                if point < best_match_point
+                    continue
+                elseif best_match_point < point
+                    let best_match_point = point
+                    let ds = [d]
+                else
+                    let ds += [d]
+                endif
+            endif
         endif
     endfor
     return ds
@@ -93,6 +108,12 @@ function! jumptoline#run_tests() abort
     call assert_equal(
         \ [{ 'lnum': 1, 'col': 1, 'path': 'prog.go'}],
         \  jumptoline#matches('prog.go:1:1: expected ''package'', found aaaaaa'))
+    call assert_equal(
+        \ [{ 'lnum': 20, 'col': 0, 'path': 'C:/Go/LICENSE'}],
+        \  jumptoline#matches('C:/Go/LICENSE:20 aaaaaa'))
+    call assert_equal(
+        \ [{ 'lnum': 33, 'col': 0, 'path': 'README.md'}],
+        \  jumptoline#matches('README.md:33||'))
 
     if !empty(v:errors)
         call writefile(v:errors, s:TEST_LOG)

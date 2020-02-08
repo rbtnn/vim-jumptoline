@@ -79,6 +79,11 @@ Go,gcc,Clang
     prog.go:1:1: expected 'package', found aaaaaa
 <
 
+ripgrep
+>
+    C:/Go/LICENSE:20
+<
+
 
 
 ==============================================================================
