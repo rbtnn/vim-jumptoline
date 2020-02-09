@@ -1,3 +1,7 @@
+let g:jumptoline#new_window = 'new window'
+let g:jumptoline#new_tabpage = 'new tabpage'
+lockvar g:jumptoline#new_window
+lockvar g:jumptoline#new_tabpage
 
 let s:ps = [
     \   { 'type' : 'quickfix', 'regex' : '^\([^|]*\)|\(\(\d\+\)\( col \(\d\+\)\)\?[^|]*\)\?|', 'path_i' : 1, 'lnum_i' : 3, 'col_i' : 5, },
@@ -10,9 +14,6 @@ let s:ps = [
     \ ]
 
 let s:TEST_LOG = expand('<sfile>:h:h:gs?\?/?') . '/test.log'
-
-let s:NEW_WINDOW = 'new window'
-let s:NEW_TABPAGE = 'new tabpage'
 
 function! jumptoline#exec(line) abort
     let found = v:false
@@ -126,9 +127,9 @@ function! jumptoline#run_tests() abort
 endfunction
 
 function! jumptoline#callback(line, bnr, fullpath, lnum, col) abort
-    if a:line == s:NEW_WINDOW
+    if a:line == g:jumptoline#new_window
         new
-    elseif a:line == s:NEW_TABPAGE
+    elseif a:line == g:jumptoline#new_tabpage
         tabnew
     else
         let wnr = matchstr(a:line, '^\d\+')
@@ -145,24 +146,7 @@ function! jumptoline#callback(line, bnr, fullpath, lnum, col) abort
     normal! zz
 endfunction
 
-function! s:choose_awin(bnr, fullpath, lnum, col) abort
-    let title = 'Choose a window to open'
-    let candidates = s:winnrlist(a:bnr, a:fullpath) + [s:NEW_WINDOW, s:NEW_TABPAGE]
-    if has('popupwin') && !get(g:, 'jumptoline_debug', 0)
-        call jumptoline#popupwin#open(title, candidates, a:bnr, a:fullpath, a:lnum, a:col)
-    else
-        let lines = []
-        for can in candidates
-            let lines += [printf('%d) %s', len(lines) + 1, can)]
-        endfor
-        let n = inputlist([title] + lines)
-        if 0 < n
-            call jumptoline#callback(candidates[n - 1], a:bnr, a:fullpath, a:lnum, a:col)
-        endif
-    endif
-endfunction
-
-function! s:winnrlist(bnr, fullpath)
+function! jumptoline#winnrlist(bnr, fullpath)
     let ws = []
     for x in jumptoline#utils#get_target_wininfos(a:bnr, a:fullpath)
         if x['quickfix']
@@ -192,3 +176,19 @@ function! s:winnrlist(bnr, fullpath)
     return ws
 endfunction
 
+function! s:choose_awin(bnr, fullpath, lnum, col) abort
+    let title = 'Choose a window to open'
+    let candidates = jumptoline#winnrlist(a:bnr, a:fullpath) + [g:jumptoline#new_window, g:jumptoline#new_tabpage]
+    if has('popupwin') && !get(g:, 'jumptoline_debug', 0)
+        call jumptoline#popupwin#open(title, candidates, a:bnr, a:fullpath, a:lnum, a:col)
+    else
+        let lines = []
+        for can in candidates
+            let lines += [printf('%d) %s', len(lines) + 1, can)]
+        endfor
+        let n = inputlist([title] + lines)
+        if 0 < n
+            call jumptoline#callback(candidates[n - 1], a:bnr, a:fullpath, a:lnum, a:col)
+        endif
+    endif
+endfunction
