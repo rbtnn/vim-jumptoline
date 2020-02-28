@@ -1,5 +1,5 @@
 
-# vim-jumptoline [![Build Status](https://travis-ci.org/rbtnn/vim-jumptoline.svg?branch=master)](https://travis-ci.org/rbtnn/vim-jumptoline)
+# vim-jumptoline [![vim](https://github.com/rbtnn/vim-jumptoline/workflows/vim/badge.svg)](https://github.com/rbtnn/vim-jumptoline/actions?query=workflow%3Avim)
 
 This plugin provides to jump to the line if cursorline includes a filename with lnum such as a line of build errors.
 
