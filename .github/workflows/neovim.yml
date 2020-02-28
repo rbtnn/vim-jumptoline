@@ -1,4 +1,4 @@
-name: vim
+name: neovim
 
 on: [push]
 
@@ -11,9 +11,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: rhysd/action-setup-vim@v1
         with:
+          neovim: true
           version: nightly
       - name: Run unit tests
         run: |
-          vim --version
-          vim -u NONE -N --noplugin -c "set rtp+=." -c "call jumptoline#run_tests()" -c "qa!"
+          nvim --version
+          nvim -u NONE -N --noplugin -c "set rtp+=." -c "call jumptoline#run_tests()" -c "qa!"
           if test -f test.log; then exit 1; fi
