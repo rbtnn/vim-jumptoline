@@ -1,7 +1,13 @@
-let g:jumptoline#new_window = 'new window'
-let g:jumptoline#new_tabpage = 'new tabpage'
-lockvar g:jumptoline#new_window
-lockvar g:jumptoline#new_tabpage
+
+
+if !exists('g:jumptoline#new_window')
+    let g:jumptoline#new_window = 'new window'
+    lockvar g:jumptoline#new_window
+endif
+if !exists('g:jumptoline#new_tabpage')
+    let g:jumptoline#new_tabpage = 'new tabpage'
+    lockvar g:jumptoline#new_tabpage
+endif
 
 let s:ps = [
     \   { 'type' : 'quickfix', 'regex' : '^\([^|]*\)|\(\(\d\+\)\( col \(\d\+\)\)\?[^|]*\)\?|', 'path_i' : 1, 'lnum_i' : 3, 'col_i' : 5, },

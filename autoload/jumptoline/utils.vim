@@ -19,7 +19,7 @@ function! jumptoline#utils#adjust_and_setpos(lnum, col)
     let s = ''
     let adjust_col = 0
     for c in split(line, '\zs')
-        if strdisplaywidth(s) < a:col
+        if adjust_col < a:col
             let s ..= c
             let adjust_col += 1
         else
