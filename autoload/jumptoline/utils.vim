@@ -15,18 +15,7 @@ function! jumptoline#utils#get_target_wininfos(bnr, fullpath) abort
 endfunction
 
 function! jumptoline#utils#adjust_and_setpos(lnum, col)
-    let line = getline(a:lnum)
-    let s = ''
-    let adjust_col = 0
-    for c in split(line, '\zs')
-        if adjust_col < a:col
-            let s ..= c
-            let adjust_col += 1
-        else
-            break
-        endif
-    endfor
-    call setpos('.', [0, a:lnum, adjust_col, 0])
+    call setpos('.', [0, a:lnum, a:col, 0])
 endfunction
 
 function! jumptoline#utils#find_thefile(target)
