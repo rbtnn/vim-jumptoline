@@ -30,6 +30,9 @@ function! jumptoline#exec(line) abort
             break
         endfor
     endfor
+    if s:check_diffline(a:line)
+        let found = v:true
+    endif
     if !found && (&filetype == 'qf')
         let x = get(getqflist(), line('.') - 1, {})
         if !empty(x)
@@ -198,3 +201,29 @@ function! s:choose_awin(bnr, fullpath, lnum, col) abort
         endif
     endif
 endfunction
+
+function! s:check_diffline(line)
+    let col = col('.') - 1
+    let lnum = search('^@@', 'bnW')
+    let lnum_plus = search('^+++', 'bnW')
+    if 0 < col && 0 < lnum_plus && lnum_plus < lnum
+        let path = matchstr(getline(lnum_plus), '^+++ [ab]/\zs.*$')
+        if filereadable(path)
+            let lines = getline(lnum + 1, line('.'))
+            let n1 = len(filter(deepcopy(lines), { i,x -> x =~# '^+' }))
+            let n2 = len(filter(deepcopy(lines), { i,x -> x =~# '^-' }))
+            let n3 = line('.') - lnum - n1 - n2 - 1
+            let m = matchlist(getline(lnum), '^@@ \([+-]\)\(\d\+\)\%(,\d\+\)\? \([+-]\)\(\d\+\),\d\+\s*@@\(.*\)$')
+            if !empty(m)
+                for i in [1, 3]
+                    if '+' == m[i]
+                        call s:choose_awin(-1, fnamemodify(path, ':p'), (m[i + 1] + n1 + n3), col)
+                        return v:true
+                    endif
+                endfor
+            endif
+        endif
+    endif
+    return v:false
+endfunction
+
