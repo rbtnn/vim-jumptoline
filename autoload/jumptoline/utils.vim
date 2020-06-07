@@ -19,21 +19,24 @@ function! jumptoline#utils#adjust_and_setpos(lnum, col)
 endfunction
 
 function! jumptoline#utils#find_thefile(target)
-    let path = expand(a:target)
-    if filereadable(path)
-        return [path]
-    endif
-    for info in getwininfo()
-        for s in [fnamemodify(bufname(info['bufnr']), ':p:h'), getcwd(info['winnr'], info['tabnr'])]
-            let xs = split(s, '[\/]')
-            for n in reverse(range(0, len(xs) - 1))
-                let path = expand(join(xs[:n] + [(a:target)], '/'))
-                if filereadable(path)
-                    return [path]
-                endif
+    try
+        let path = expand(a:target)
+        if filereadable(path)
+            return [path]
+        endif
+        for info in getwininfo()
+            for s in [fnamemodify(bufname(info['bufnr']), ':p:h'), getcwd(info['winnr'], info['tabnr'])]
+                let xs = split(s, '[\/]')
+                for n in reverse(range(0, len(xs) - 1))
+                    let path = expand(join(xs[:n] + [(a:target)], '/'))
+                    if filereadable(path)
+                        return [path]
+                    endif
+                endfor
             endfor
         endfor
-    endfor
+    catch
+    endtry
     return []
 endfunction
 
