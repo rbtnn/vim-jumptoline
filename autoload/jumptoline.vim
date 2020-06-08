@@ -30,7 +30,7 @@ function! jumptoline#exec(line) abort
             break
         endfor
     endfor
-    if s:check_diffline(a:line)
+    if !found && s:check_diffline(a:line)
         let found = v:true
     endif
     if !found && (&filetype == 'qf')
@@ -208,6 +208,10 @@ function! s:check_diffline(line)
     let lnum_plus = search('^+++', 'bnW')
     if 0 < col && 0 < lnum_plus && lnum_plus < lnum
         let path = matchstr(getline(lnum_plus), '^+++ [ab]/\zs.*$')
+        if empty(path)
+            " for svn diff
+            let path = matchstr(getline(lnum_plus), '^+++ \zs.*\ze ([^)]\+)$')
+        endif
         if filereadable(path)
             let lines = getline(lnum + 1, line('.'))
             let n1 = len(filter(deepcopy(lines), { i,x -> x =~# '^+' }))
