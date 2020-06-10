@@ -204,9 +204,12 @@ endfunction
 
 function! s:check_diffline(line)
     let col = col('.') - 1
+    if col < 1
+        let col = 1
+    endif
     let lnum = search('^@@', 'bnW')
     let lnum_plus = search('^+++', 'bnW')
-    if 0 < col && 0 < lnum_plus && lnum_plus < lnum
+    if 0 < lnum_plus && lnum_plus < lnum
         let path = matchstr(getline(lnum_plus), '^+++ [ab]/\zs.*$')
         if empty(path)
             " for svn diff
