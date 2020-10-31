@@ -1,236 +1,209 @@
 
 
 if !exists('g:jumptoline#new_window')
-    let g:jumptoline#new_window = 'new window'
-    lockvar g:jumptoline#new_window
+  let g:jumptoline#new_window = 'new window'
+  lockvar g:jumptoline#new_window
 endif
 if !exists('g:jumptoline#new_tabpage')
-    let g:jumptoline#new_tabpage = 'new tabpage'
-    lockvar g:jumptoline#new_tabpage
+  let g:jumptoline#new_tabpage = 'new tabpage'
+  lockvar g:jumptoline#new_tabpage
 endif
 
 let s:ps = [
-    \   { 'type' : 'quickfix', 'regex' : '^\([^|]*\)|\(\(\d\+\)\( col \(\d\+\)\)\?[^|]*\)\?|', 'path_i' : 1, 'lnum_i' : 3, 'col_i' : 5, },
-    \   { 'type' : 'msbuild,C#,F#', 'regex' : '^\s*\(.*\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
-    \   { 'type' : 'VC', 'regex' : '^\s*\(.*\)(\(\d\+\))\s*:.*$', 'path_i' : 1, 'lnum_i' : 2, },
-    \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
-    \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
-    \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
-    \   { 'type' : 'Go,gcc,Clang,ripgrep,', 'regex' : '^\s*\(.\{-}\):\(\d\+\)\(:\(\d\+\):\)\?.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 4, },
-    \ ]
+  \   { 'type' : 'quickfix', 'regex' : '^\([^|]*\)|\(\(\d\+\)\( col \(\d\+\)\)\?[^|]*\)\?|', 'path_i' : 1, 'lnum_i' : 3, 'col_i' : 5, },
+  \   { 'type' : 'msbuild,C#,F#', 'regex' : '^\s*\(.*\)(\(\d\+\),\(\d\+\)):.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
+  \   { 'type' : 'VC', 'regex' : '^\s*\(.*\)(\(\d\+\))\s*:.*$', 'path_i' : 1, 'lnum_i' : 2, },
+  \   { 'type' : 'Rust', 'regex' : '^\s*--> \(.*\.rs\):\(\d\+\):\(\d\+\)$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 3, },
+  \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
+  \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
+  \   { 'type' : 'Go,gcc,Clang,ripgrep,', 'regex' : '^\s*\(.\{-}\):\(\d\+\)\(:\(\d\+\):\)\?.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 4, },
+  \ ]
 
 let s:TEST_LOG = expand('<sfile>:h:h:gs?\?/?') . '/test.log'
 
-function! jumptoline#exec(line) abort
-    let found = v:false
-    for d in jumptoline#matches(a:line)
-        for fullpath in jumptoline#utils#find_thefile(d['path'])
-            call s:choose_awin(-1, fullpath, d['lnum'], d['col'])
-            let found = v:true
-            break
-        endfor
+function! jumptoline#exec(line, ...) abort
+  let q_bang = get(a:000, 0, '')
+  let found = v:false
+  for d in jumptoline#matches(a:line)
+    for fullpath in jumptoline#utils#find_thefile(d['path'])
+      call s:choose_awin(q_bang, -1, fullpath, d['lnum'], d['col'])
+      let found = v:true
+      break
     endfor
-    if !found && s:check_diffline(a:line)
-        let found = v:true
+  endfor
+  if !found && (&filetype == 'qf')
+    let x = get(getqflist(), line('.') - 1, {})
+    if !empty(x)
+      call s:choose_awin(q_bang, x['bufnr'], '', x['lnum'], x['col'])
     endif
-    if !found && (&filetype == 'qf')
-        let x = get(getqflist(), line('.') - 1, {})
-        if !empty(x)
-            call s:choose_awin(x['bufnr'], '', x['lnum'], x['col'])
-        endif
-    endif
+  endif
 endfunction
 
 function! jumptoline#matches(line) abort
-    let ds = []
-    let best_match_point = 0
-    for p in s:ps
-        let m = matchlist(a:line, p['regex'])
-        if !empty(m)
-            let path = m[p['path_i']]
+  let ds = []
+  let best_match_point = 0
+  for p in s:ps
+    let m = matchlist(a:line, p['regex'])
+    if !empty(m)
+      let path = m[p['path_i']]
 
-            let lnum = 0
-            if has_key(p, 'lnum_i')
-                let lnum = str2nr(m[p['lnum_i']])
-            endif
+      let lnum = 0
+      if has_key(p, 'lnum_i')
+        let lnum = str2nr(m[p['lnum_i']])
+      endif
 
-            let col = 0
-            if has_key(p, 'col_i')
-                let col = str2nr(m[p['col_i']])
-            endif
+      let col = 0
+      if has_key(p, 'col_i')
+        let col = str2nr(m[p['col_i']])
+      endif
 
-            let d = {
-                \ 'path' : path,
-                \ 'lnum' : lnum,
-                \ 'col' : col,
-                \ }
-            if -1 == index(ds, d)
-                let point = (0 < lnum) + (0 < col) + filereadable(path)
+      let d = {
+        \ 'path' : path,
+        \ 'lnum' : lnum,
+        \ 'col' : col,
+        \ }
+      if -1 == index(ds, d)
+        let point = (0 < lnum) + (0 < col) + filereadable(path)
 
-                if point < best_match_point
-                    continue
-                elseif best_match_point < point
-                    let best_match_point = point
-                    let ds = [d]
-                else
-                    let ds += [d]
-                endif
-            endif
+        if point < best_match_point
+          continue
+        elseif best_match_point < point
+          let best_match_point = point
+          let ds = [d]
+        else
+          let ds += [d]
         endif
-    endfor
-    return ds
+      endif
+    endif
+  endfor
+  return ds
 endfunction
 
 function! jumptoline#run_tests() abort
-    if filereadable(s:TEST_LOG)
-        call delete(s:TEST_LOG)
-    endif
+  if filereadable(s:TEST_LOG)
+    call delete(s:TEST_LOG)
+  endif
 
-    let v:errors = []
+  let v:errors = []
 
-    call assert_equal(
-        \ [{ 'lnum': 0, 'col': 0, 'path': 'xxx.vim'}],
-        \ jumptoline#matches('xxx.vim||'))
-    call assert_equal(
-        \ [{ 'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
-        \ jumptoline#matches('xxx.vim|1006 col 8 error| call system(prog)'))
-    call assert_equal(
-        \ [{ 'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
-        \ jumptoline#matches('xxx.vim|1006 col 8| call system(prog)'))
-    call assert_equal(
-        \ [{ 'lnum': 923, 'col': 21, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
-        \  jumptoline#matches('C:\Users\rbtnn\Desktop\main.vb(923,21): warning BC42021: ...'))
-    call assert_equal(
-        \ [{ 'lnum': 923, 'col': 0, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
-        \  jumptoline#matches('C:\Users\rbtnn\Desktop\main.vb(923): warning BC42021: ...'))
-    call assert_equal(
-        \ [{ 'lnum': 9, 'col': 10, 'path': 'main.cs'}],
-        \  jumptoline#matches('main.cs(9,10): error CS1002: ; expected'))
-    call assert_equal(
-        \ [{ 'lnum': 1, 'col': 0, 'path': './prog.py'}],
-        \  jumptoline#matches('File "./prog.py", line 1, in <module>'))
-    call assert_equal(
-        \ [{ 'lnum': 1, 'col': 0, 'path': 'prog.rb'}],
-        \  jumptoline#matches('prog.rb:1:in `<main>'': undefined local variable or method `aaaa'' for ...'))
-    call assert_equal(
-        \ [{ 'lnum': 7, 'col': 42, 'path': 'src\main.rs'}],
-        \  jumptoline#matches('--> src\main.rs:7:42'))
-    call assert_equal(
-        \ [{ 'lnum': 1, 'col': 1, 'path': 'prog.go'}],
-        \  jumptoline#matches('prog.go:1:1: expected ''package'', found aaaaaa'))
-    call assert_equal(
-        \ [{ 'lnum': 20, 'col': 0, 'path': 'C:/Go/LICENSE'}],
-        \  jumptoline#matches('C:/Go/LICENSE:20 aaaaaa'))
-    call assert_equal(
-        \ [{ 'lnum': 33, 'col': 0, 'path': 'README.md'}],
-        \  jumptoline#matches('README.md:33||'))
+  call assert_equal(
+    \ [{ 'lnum': 0, 'col': 0, 'path': 'xxx.vim'}],
+    \ jumptoline#matches('xxx.vim||'))
+  call assert_equal(
+    \ [{ 'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
+    \ jumptoline#matches('xxx.vim|1006 col 8 error| call system(prog)'))
+  call assert_equal(
+    \ [{ 'lnum': 1006, 'col': 8, 'path': 'xxx.vim'}],
+    \ jumptoline#matches('xxx.vim|1006 col 8| call system(prog)'))
+  call assert_equal(
+    \ [{ 'lnum': 923, 'col': 21, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
+    \  jumptoline#matches('C:\Users\rbtnn\Desktop\main.vb(923,21): warning BC42021: ...'))
+  call assert_equal(
+    \ [{ 'lnum': 923, 'col': 0, 'path': 'C:\Users\rbtnn\Desktop\main.vb'}],
+    \  jumptoline#matches('C:\Users\rbtnn\Desktop\main.vb(923): warning BC42021: ...'))
+  call assert_equal(
+    \ [{ 'lnum': 9, 'col': 10, 'path': 'main.cs'}],
+    \  jumptoline#matches('main.cs(9,10): error CS1002: ; expected'))
+  call assert_equal(
+    \ [{ 'lnum': 1, 'col': 0, 'path': './prog.py'}],
+    \  jumptoline#matches('File "./prog.py", line 1, in <module>'))
+  call assert_equal(
+    \ [{ 'lnum': 1, 'col': 0, 'path': 'prog.rb'}],
+    \  jumptoline#matches('prog.rb:1:in `<main>'': undefined local variable or method `aaaa'' for ...'))
+  call assert_equal(
+    \ [{ 'lnum': 7, 'col': 42, 'path': 'src\main.rs'}],
+    \  jumptoline#matches('--> src\main.rs:7:42'))
+  call assert_equal(
+    \ [{ 'lnum': 1, 'col': 1, 'path': 'prog.go'}],
+    \  jumptoline#matches('prog.go:1:1: expected ''package'', found aaaaaa'))
+  call assert_equal(
+    \ [{ 'lnum': 20, 'col': 0, 'path': 'C:/Go/LICENSE'}],
+    \  jumptoline#matches('C:/Go/LICENSE:20 aaaaaa'))
+  call assert_equal(
+    \ [{ 'lnum': 33, 'col': 0, 'path': 'README.md'}],
+    \  jumptoline#matches('README.md:33||'))
 
-    if !empty(v:errors)
-        call writefile(v:errors, s:TEST_LOG)
-        for err in v:errors
-            echohl Error
-            echo err
-            echohl None
-        endfor
-    endif
+  if !empty(v:errors)
+    call writefile(v:errors, s:TEST_LOG)
+    for err in v:errors
+      echohl Error
+      echo err
+      echohl None
+    endfor
+  endif
 endfunction
 
 function! jumptoline#callback(line, bnr, fullpath, lnum, col) abort
-    if a:line == g:jumptoline#new_window
-        new
-    elseif a:line == g:jumptoline#new_tabpage
-        tabnew
+  if a:line == g:jumptoline#new_window
+    new
+  elseif a:line == g:jumptoline#new_tabpage
+    tabnew
+  else
+    let wnr = matchstr(a:line, '^\d\+')
+    execute wnr .. 'wincmd w'
+  endif
+  if !jumptoline#utils#same_buffer(bufnr(), a:bnr, a:fullpath)
+    if -1 == a:bnr
+      execute printf('edit %s', a:fullpath)
     else
-        let wnr = matchstr(a:line, '^\d\+')
-        execute wnr .. 'wincmd w'
+      execute printf('%dbuffer', a:bnr)
     endif
-    if !jumptoline#utils#same_buffer(bufnr(), a:bnr, a:fullpath)
-        if -1 == a:bnr
-            execute printf('edit %s', a:fullpath)
-        else
-            execute printf('%dbuffer', a:bnr)
-        endif
-    endif
-    call jumptoline#utils#adjust_and_setpos(a:lnum, a:col)
-    normal! zz
+  endif
+  call jumptoline#utils#adjust_and_setpos(a:lnum, a:col)
+  normal! zz
 endfunction
 
 function! jumptoline#winnrlist(bnr, fullpath)
-    let ws = []
-    for x in jumptoline#utils#get_target_wininfos(a:bnr, a:fullpath)
-        if x['quickfix']
-            let name = '[quickfix]'
-        elseif x['loclist']
-            let name = '[loclist]'
-        elseif 'help' == getbufvar(x['bufnr'], '&buftype')
-            let name = '[help]'
-        else
-            let name = bufname(x['bufnr'])
-            if empty(name)
-                let name = '[No Name]'
-            endif
-        endif
-        let mark = ' '
-        if x['winnr'] == winnr('#')
-            let mark = '#'
-        elseif x['bufnr'] == bufnr()
-            let mark = '%'
-        endif
-        let modified = ''
-        if x['modified']
-            let modified = '[+]'
-        endif
-        let ws += [printf('%d %s %s%s', x['winnr'], mark, name, modified)]
-    endfor
-    return ws
+  let ws = []
+  for x in jumptoline#utils#get_target_wininfos(a:bnr, a:fullpath)
+    if x['quickfix']
+      let name = '[quickfix]'
+    elseif x['loclist']
+      let name = '[loclist]'
+    elseif 'help' == getbufvar(x['bufnr'], '&buftype')
+      let name = '[help]'
+    else
+      let name = bufname(x['bufnr'])
+      if empty(name)
+        let name = '[No Name]'
+      endif
+    endif
+    let mark = ' '
+    if x['winnr'] == winnr('#')
+      let mark = '#'
+    elseif x['bufnr'] == bufnr()
+      let mark = '%'
+    endif
+    let modified = ''
+    if x['modified']
+      let modified = '[+]'
+    endif
+    let ws += [printf('%d %s %s%s', x['winnr'], mark, name, modified)]
+  endfor
+  return ws
 endfunction
 
-function! s:choose_awin(bnr, fullpath, lnum, col) abort
+function! s:choose_awin(q_bang, bnr, fullpath, lnum, col) abort
+  if has('popupwin')
+    call jumptoline#popupwin#hide_popupwin_term()
+  endif
+  if '!' == a:q_bang
+    call jumptoline#callback('', a:bnr, a:fullpath, a:lnum, a:col)
+  else
     let title = 'Choose a window to open'
     let candidates = jumptoline#winnrlist(a:bnr, a:fullpath) + [g:jumptoline#new_window, g:jumptoline#new_tabpage]
     if has('popupwin') && !get(g:, 'jumptoline_debug', 0)
-        call jumptoline#popupwin#open(title, candidates, a:bnr, a:fullpath, a:lnum, a:col)
+      call jumptoline#popupwin#open(title, candidates, a:bnr, a:fullpath, a:lnum, a:col)
     else
-        let lines = []
-        for can in candidates
-            let lines += [printf('%d) %s', len(lines) + 1, can)]
-        endfor
-        let n = inputlist([title] + lines)
-        if 0 < n
-            call jumptoline#callback(candidates[n - 1], a:bnr, a:fullpath, a:lnum, a:col)
-        endif
+      let lines = []
+      for can in candidates
+        let lines += [printf('%d) %s', len(lines) + 1, can)]
+      endfor
+      let n = inputlist([title] + lines)
+      if 0 < n
+        call jumptoline#callback(candidates[n - 1], a:bnr, a:fullpath, a:lnum, a:col)
+      endif
     endif
-endfunction
-
-function! s:check_diffline(line)
-    let col = col('.') - 1
-    if col < 1
-        let col = 1
-    endif
-    let lnum = search('^@@', 'bnW')
-    let lnum_plus = search('^+++', 'bnW')
-    if 0 < lnum_plus && lnum_plus < lnum
-        let path = matchstr(getline(lnum_plus), '^+++ [ab]/\zs.*$')
-        if empty(path)
-            " for svn diff
-            let path = matchstr(getline(lnum_plus), '^+++ \zs.*\ze ([^)]\+)$')
-        endif
-        if filereadable(path)
-            let lines = getline(lnum + 1, line('.'))
-            let n1 = len(filter(deepcopy(lines), { i,x -> x =~# '^+' }))
-            let n2 = len(filter(deepcopy(lines), { i,x -> x =~# '^-' }))
-            let n3 = line('.') - lnum - n1 - n2 - 1
-            let m = matchlist(getline(lnum), '^@@ \([+-]\)\(\d\+\)\%(,\d\+\)\? \([+-]\)\(\d\+\),\d\+\s*@@\(.*\)$')
-            if !empty(m)
-                for i in [1, 3]
-                    if '+' == m[i]
-                        call s:choose_awin(-1, fnamemodify(path, ':p'), (m[i + 1] + n1 + n3), col)
-                        return v:true
-                    endif
-                endfor
-            endif
-        endif
-    endif
-    return v:false
+  endif
 endfunction
 

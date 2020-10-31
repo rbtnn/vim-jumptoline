@@ -6,7 +6,6 @@ endif
 let s:jumptoline_border_winnr = -1
 
 function! jumptoline#popupwin#open(title, candidates, bnr, fullpath, lnum, col) abort
-  call s:hide_popupwin_term()
   call popup_menu(a:candidates, #{
     \   title: a:title,
     \   callback: function('s:callback', [(a:bnr), (a:fullpath), (a:lnum), (a:col)]),
@@ -19,7 +18,7 @@ function! jumptoline#popupwin#open(title, candidates, bnr, fullpath, lnum, col) 
   endif
 endfunction
 
-function! s:hide_popupwin_term() abort
+function! jumptoline#popupwin#hide_popupwin_term() abort
   if exists('*popup_list') && exists('*popup_close')
     for winid in popup_list()
       if getwininfo(winid)[0]['terminal']
