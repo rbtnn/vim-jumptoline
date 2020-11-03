@@ -26,9 +26,11 @@ Concepts                                                 *jumptoline-concepts*
 Commands                                                 *jumptoline-commands*
 
                                                          *:JumpToLine*
-:JumpToLine	Jump to the line if cursorline matches one of the following
+:JumpToLine[!]	Jump to the line if cursorline matches one of the following
 		|jumptoline-patterns|. If no match is found on the quickfix
 		window, use the information under the cursor of quickfix.
+		When ! is given, open the file directly. It does not call
+		|popup_menu()| and |inputlist()|.
 
 		You map a key to :JumpToLine in your .vimrc, then it's so
 		useful for jumpping.
@@ -96,6 +98,11 @@ Go,gcc,Clang
 ripgrep
 >
     C:/Go/LICENSE:20
+<
+
+path only
+>
+    C:/Go/LICENSE
 <
 
 

@@ -23,10 +23,11 @@ Plug 'rbtnn/vim-jumptoline'
 
 ## Usage
 
-### :JumpToLine
+### :JumpToLine[!]
 
 Jump to the line if cursorline matches one of the following patterns.  
 If no match is found on the quickfix window, use the information under the cursor of quickfix.  
+When ! is given, open the file directly. It does not call `popup_menu()` and `inputlist()`.  
 
 You map a key to `:JumpToLine` in your .vimrc, then it's so useful for jumpping.
 
@@ -81,6 +82,11 @@ prog.go:1:1: expected 'package', found aaaaaa
 __ripgrep__
 ```
     C:/Go/LICENSE:20
+```
+
+__path only__
+```
+    C:/Go/LICENSE
 ```
 
 ## License

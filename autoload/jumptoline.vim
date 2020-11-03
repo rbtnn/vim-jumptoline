@@ -1,5 +1,4 @@
 
-
 if !exists('g:jumptoline#new_window')
   let g:jumptoline#new_window = 'new window'
   lockvar g:jumptoline#new_window
@@ -17,6 +16,7 @@ let s:ps = [
   \   { 'type' : 'Python', 'regex' : '^\s*File "\([^"]*\)", line \(\d\+\),.*$', 'path_i' : 1, 'lnum_i' : 2, },
   \   { 'type' : 'Ruby', 'regex' : '^\s*\(.*.rb\):\(\d\+\):.*$', 'path_i' : 1, 'lnum_i' : 2, },
   \   { 'type' : 'Go,gcc,Clang,ripgrep,', 'regex' : '^\s*\(.\{-}\):\(\d\+\)\(:\(\d\+\):\)\?.*$', 'path_i' : 1, 'lnum_i' : 2, 'col_i' : 4, },
+  \   { 'type' : 'path_only', 'regex' : '^\s*\([^|]\+\)\s*$', 'path_i' : 1, },
   \ ]
 
 let s:TEST_LOG = expand('<sfile>:h:h:gs?\?/?') . '/test.log'
@@ -140,7 +140,9 @@ function! jumptoline#callback(line, bnr, fullpath, lnum, col) abort
     tabnew
   else
     let wnr = matchstr(a:line, '^\d\+')
-    execute wnr .. 'wincmd w'
+    if !empty(wnr)
+      execute wnr .. 'wincmd w'
+    endif
   endif
   if !jumptoline#utils#same_buffer(bufnr(), a:bnr, a:fullpath)
     if -1 == a:bnr
