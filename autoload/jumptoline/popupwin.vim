@@ -47,20 +47,12 @@ function! s:set_border(winnr) abort
   let ws = filter(getwininfo(), { i,x -> (x['tabnr'] == tabpagenr()) && (a:winnr == x['winnr']) })
   if 1 == len(ws)
     let winfo = ws[0]
-    let offset = 0
-    if has('tabsidebar')
-      if !&tabsidebaralign
-        if (2 == &showtabsidebar) || ((1 < tabpagenr('$')) && (1 == &showtabsidebar))
-          let offset += &tabsidebarcolumns
-        endif
-      endif
-    endif
     let b = 2
     let w = winfo['width'] - b
     let h = winfo['height'] - b
     let s:jumptoline_border_winnr = popup_create('', #{
       \   line: winfo['winrow'],
-      \   col: offset + winfo['wincol'],
+      \   col: winfo['wincol'],
       \   mask: [[b, w + 1, b, h + 1]],
       \   minwidth: w,
       \   minheight: h,
